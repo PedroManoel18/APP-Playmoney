@@ -1,0 +1,35 @@
+body{
+    background: linear-gradient(135deg,#f6f9fc,#dbeafe);
+    font-family: Arial, sans-serif;
+}
+
+.card-playmoney{
+    width: 400px;
+    border: none;
+    border-radius: 20px;
+}
+
+.logo{
+    color: #198754;
+    font-weight: bold;
+}
+
+.form-control{
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.btn{
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.dashboard-card{
+    border: none;
+    border-radius: 18px;
+    transition: .3s;
+}
+
+.dashboard-card:hover{
+    transform: translateY(-5px);
+}
