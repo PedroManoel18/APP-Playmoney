@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Despesas | PlayMoney</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-danger">
+
+<div class="container-fluid">
+
+<span class="navbar-brand">
+💸 PlayMoney
+</span>
+
+<div>
+
+<a href="dashboard.php"
+   class="btn btn-light">
+
+Dashboard
+
+</a>
+
+</div>
+
+</div>
+
+</nav>
+
+<div class="container mt-5">
+
+<h2>Cadastro de Despesas</h2>
+
+<form action="salvar_despesa.php"
+      method="POST"
+      class="card p-4 shadow">
+
+<input type="number"
+       step="0.01"
+       name="valor"
+       class="form-control mb-3"
+       placeholder="Valor"
+       required>
+
+<input type="text"
+       name="descricao"
+       class="form-control mb-3"
+       placeholder="Descrição"
+       required>
+
+<select name="tipo"
+        class="form-control mb-3">
+
+<option value="Fixa">Fixa</option>
+
+<option value="Variavel">Variável</option>
+
+</select>
+
+<input type="date"
+       name="data_vencimento"
+       class="form-control mb-3">
+
+<button class="btn btn-danger">
+
+Salvar Despesa
+
+</button>
+
+</form>
+
+<div class="mt-5">
+
+<a href="listar_despesas.php"
+   class="btn btn-primary">
+
+Visualizar Despesas
+
+</a>
+
+</div>
+
+</div>
+
+</body>
+</html>
