@@ -1,164 +1,66 @@
 <?php
-session_start();
+require_once("funcoes.php");
+require_once("conexao.php");
+exigir_login();
 
-include("conexao.php");
-
-$id_usuario = $_SESSION['id'];
-
-$query = mysqli_query(
-$conn,
-"SELECT * FROM receitas
- WHERE id_usuario='$id_usuario'"
-);
+$id_usuario = (int) $_SESSION['id'];
+$sql = mysqli_prepare($conn, "SELECT r.id_receita, r.valor, r.descricao, r.tipo, r.data_lancamento, c.nome_categoria FROM receitas r LEFT JOIN categorias c ON c.id_categoria = r.id_categoria AND c.id_usuario = r.id_usuario WHERE r.id_usuario = ? ORDER BY r.data_lancamento DESC");
+mysqli_stmt_bind_param($sql, "i", $id_usuario);
+mysqli_stmt_execute($sql);
+$query = mysqli_stmt_get_result($sql);
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-
 <meta charset="UTF-8">
-
-<title>Minhas Receitas | PlayMoney</title>
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet">
-
-<link rel="stylesheet"
-      href="css/style.css">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listar Receitas | PlayMoney</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-
-<!-- NAVBAR -->
-
-<nav class="navbar navbar-dark bg-success shadow">
-
-<div class="container-fluid">
-
-<span class="navbar-brand">
-💰 PlayMoney
-</span>
-
-<div>
-
-<a href="dashboard.php"
-   class="btn btn-light">
-
-Dashboard
-
-</a>
-
-<a href="receitas.html"
-   class="btn btn-warning">
-
-Nova Receita
-
-</a>
-
-<a href="logout.php"
-   class="btn btn-dark">
-
-Sair
-
-</a>
-
-</div>
-
-</div>
-
+<nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <div class="container">
+        <a class="navbar-brand" href="dashboard.php">💰 PlayMoney</a>
+        <div>
+            <a href="dashboard.php" class="btn btn-light">Dashboard</a>
+            <a href="receitas.php" class="btn btn-warning">Nova Receita</a>
+        </div>
+    </div>
 </nav>
-
-
-<!-- CONTEÚDO -->
-
-<div class="container mt-5">
-
-<h2>Minhas Receitas</h2>
-
-<p class="text-muted">
-Visualize e gerencie suas receitas cadastradas
-</p>
-
-<div class="card shadow p-4">
-
-<table class="table table-bordered table-hover bg-white">
-
-<tr class="table-success">
-
-<th>Valor</th>
-<th>Descrição</th>
-<th>Tipo</th>
-<th>Data</th>
-<th>Ações</th>
-
-</tr>
-
-<?php while($receita = mysqli_fetch_assoc($query)){ ?>
-
-<tr>
-
-<td>
-R$ <?php echo number_format($receita['valor'],2,",","."); ?>
-</td>
-
-<td>
-<?php echo $receita['descricao']; ?>
-</td>
-
-<td>
-<?php echo $receita['tipo']; ?>
-</td>
-
-<td>
-<?php echo $receita['data_lancamento']; ?>
-</td>
-
-<td>
-
-<a href="editar_receitas.php?id=<?php echo $receita['id_receita']; ?>"
-   class="btn btn-primary btn-sm">
-
-Editar
-
-</a>
-
-</td>
-
-</tr>
-
-<?php } ?>
-
-</table>
-
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="mb-4">Receitas Cadastradas</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Categoria</th><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Data</th><th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($receita = mysqli_fetch_assoc($query)) { ?>
+                            <tr>
+                                <td><?php echo (int) $receita['id_receita']; ?></td>
+                                <td><?php echo proteger_saida($receita['nome_categoria'] ?: 'Sem Categoria'); ?></td>
+                                <td><?php echo proteger_saida($receita['descricao']); ?></td>
+                                <td><?php echo proteger_saida($receita['tipo']); ?></td>
+                                <td>R$ <?php echo number_format((float) $receita['valor'], 2, ',', '.'); ?></td>
+                                <td>
+                                    <?php echo !empty($receita['data_lancamento']) ? date('d/m/Y', strtotime($receita['data_lancamento'])) : '-'; ?>
+                                </td>
+                                <td>
+                                    <a href="editar_receita.php?id=<?php echo (int) $receita['id_receita']; ?>" class="btn btn-warning btn-sm">Editar</a>
+                                    <a href="excluir_receita.php?id=<?php echo (int) $receita['id_receita']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Deseja realmente excluir esta receita?');">Excluir</a>
+                                </td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-
-
-<!-- BOTÕES -->
-
-<div class="d-flex gap-2 mt-4">
-
-<a href="receitas.html"
-   class="btn btn-success">
-
-Cadastrar Nova Receita
-
-</a>
-
-<a href="dashboard.php"
-   class="btn btn-primary">
-
-Voltar ao Dashboard
-
-</a>
-
-</div>
-
-</div>
-
 </body>
 </html>

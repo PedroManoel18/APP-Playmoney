@@ -1,37 +1,37 @@
 <?php
 include("conexao.php");
 
-$nome = trim($_POST['nome']);
-$email = trim($_POST['email']);
-$senha = trim($_POST['senha']);
+$nome = trim($_POST['nome'] ?? '');
+$email = trim($_POST['email'] ?? '');
+$senhaDigitada = $_POST['senha'] ?? '';
 
-$stmt = mysqli_prepare($conn, "SELECT id FROM usuarios WHERE email=?");
-mysqli_stmt_bind_param($stmt, "s", $email);
-mysqli_stmt_execute($stmt);
-mysqli_stmt_store_result($stmt);
+if ($nome === '' || $email === '' || $senhaDigitada === '') {
+    die("Preencha todos os campos.");
+}
 
-if (mysqli_stmt_num_rows($stmt) > 0) {
-    echo "E-mail já cadastrado! <br><a href='cadastro.html'>Voltar</a>";
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    die("E-mail inválido.");
+}
+
+$senha = password_hash($senhaDigitada, PASSWORD_DEFAULT);
+
+$sqlVerifica = mysqli_prepare($conn, "SELECT id FROM usuarios WHERE email = ?");
+mysqli_stmt_bind_param($sqlVerifica, "s", $email);
+mysqli_stmt_execute($sqlVerifica);
+$resultado = mysqli_stmt_get_result($sqlVerifica);
+
+if (mysqli_num_rows($resultado) > 0) {
+    echo "<script>alert('E-mail já cadastrado'); window.location='cadastro.php';</script>";
     exit();
 }
 
-$senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+$sql = mysqli_prepare($conn, "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)");
+mysqli_stmt_bind_param($sql, "sss", $nome, $email, $senha);
 
-$stmt = mysqli_prepare(
-    $conn,
-    "INSERT INTO usuarios(nome,email,senha) VALUES(?,?,?)"
-);
-
-mysqli_stmt_bind_param($stmt, "sss", $nome, $email, $senhaHash);
-
-if (mysqli_stmt_execute($stmt)) {
-    $id = mysqli_insert_id($conn);
-    echo "
-    <h2>Cadastro realizado com sucesso!</h2>
-    Código do usuário: <strong>$id</strong><br><br>
-    <a href='login.php'>Ir para login</a>
-    ";
-} else {
-    echo "Erro ao cadastrar. <br><a href='cadastro.html'>Voltar</a>";
+if (mysqli_stmt_execute($sql)) {
+    echo "<script>alert('Cadastro realizado com sucesso!'); window.location='login.php';</script>";
+    exit();
 }
+
+die("Erro ao cadastrar usuário.");
 ?>
